@@ -60,6 +60,7 @@ TT_MINUS    = 'MINUS'
 TT_MUL      = 'MUL'
 TT_DIV      = 'DIV'
 TT_POW      = 'POW'
+TT_FLOOR    = 'FLOOR'
 TT_LPAREN   = 'LPAREN'
 TT_RPAREN   = 'RPAREN'
 
@@ -88,6 +89,12 @@ class Lexer:
         self.pos.advance(self.current_char)
         self.current_char = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
 
+    def peek(self):
+        peek_pos = self.pos.idx + 1
+        if peek_pos < len(self.text):
+            return self.text[peek_pos]
+        return None
+
     def make_tokens(self):
         tokens = []
 
@@ -103,16 +110,23 @@ class Lexer:
                 tokens.append(Token(TT_MINUS))
                 self.advance()
             elif self.current_char == '*':
-                if self.peek() == '*':
+                next_char = self.peek()
+                if next_char == '*':
                     self.advance()
                     self.advance()
                     tokens.append(Token(TT_POW))
                 else:
+                    self.advance()
                     tokens.append(Token(TT_MUL))
-                self.advance()
             elif self.current_char == '/':
-                tokens.append(Token(TT_DIV))
-                self.advance()
+                next_char = self.peek()
+                if next_char == '/':
+                    self.advance()
+                    self.advance()
+                    tokens.append(Token(TT_FLOOR))
+                else:
+                    self.advance()
+                    tokens.append(Token(TT_DIV))
             elif self.current_char == '(':
                 tokens.append(Token(TT_LPAREN))
                 self.advance()
