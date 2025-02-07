@@ -9,6 +9,14 @@ TT_MUL      = 'MUL'
 TT_DIV      = 'DIV'
 TT_LPAREN   = 'LPAREN'
 TT_RPAREN   = 'RPAREN'
+TT_POW     = 'POW'        # Power/Exponentiation **
+TT_MOD     = 'MOD'        # Modulo %
+TT_FLOOR   = 'FLOOR'      # Floor division //
+TT_EQ      = 'EQ'         # Equal ==
+TT_GT      = 'GT'         # Greater than >
+TT_LT      = 'LT'         # Less than 
+TT_GTE     = 'GTE'        # Greater than or equal >=
+TT_LTE     = 'LTE'        # Less than or equal <=
 
 
 #Define tokens
