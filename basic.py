@@ -13,7 +13,7 @@ TT_POW      = 'POW'     # **
 TT_MOD      = 'MOD'     # %
 TT_FLOOR    = 'FLOOR'   # //
 TT_GT       = 'GT'      # >
-TT_LT       = 'LT'      # 
+TT_LT       = 'LT'      # <
 TT_EQ       = 'EQ'      # ==
 
 #Define tokens
@@ -38,16 +38,19 @@ class Lexer:
         self.current_char = None
         self.advance()
 
-
+    #First character increment
     def advance(self):
         self.pos += 1
         self.current_char = self.text[pos] if self.pos < len(self.text) else None
     
+    #Next Character Peek
     def peek(self):
         peek_pos = self.pos +1
         return self.text[peek_pos] if peek_pos <len(self.text) else None
 
-
+#################
+#Operations
+################
 
     def make_tokens(self):
         tokens = []
