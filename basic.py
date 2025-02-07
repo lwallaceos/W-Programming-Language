@@ -1,11 +1,13 @@
-##############
-#Constants
-###############
-DIGITS ='123456789'
+#######################################
+# CONSTANTS
+#######################################
 
-############################
-#Errors
-############################
+DIGITS = '0123456789'
+
+#######################################
+# ERRORS
+#######################################
+
 class Error:
     def __init__(self, pos_start, pos_end, error_name, details):
         self.pos_start = pos_start
@@ -47,11 +49,11 @@ class Position:
     def copy(self):
         return Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
 
-        
-################################
- #Token
-###############################
-TT_INT      = 'TT_INT'
+#######################################
+# TOKENS
+#######################################
+
+TT_INT		= 'INT'
 TT_FLOAT    = 'FLOAT'
 TT_PLUS     = 'PLUS'
 TT_MINUS    = 'MINUS'
@@ -59,55 +61,37 @@ TT_MUL      = 'MUL'
 TT_DIV      = 'DIV'
 TT_LPAREN   = 'LPAREN'
 TT_RPAREN   = 'RPAREN'
-TT_POW      = 'POW'     # **
-TT_MOD      = 'MOD'     # %
-TT_FLOOR    = 'FLOOR'   # //
-TT_GT       = 'GT'      # >
-TT_LT       = 'LT'      # <
-TT_EQ       = 'EQ'      # ==
 
-#Define tokens
 class Token:
-    def __init__(self, type_, value = None):
+    def __init__(self, type_, value=None):
         self.type = type_
-        self.type = value
+        self.value = value
     
     def __repr__(self):
         if self.value: return f'{self.type}:{self.value}'
         return f'{self.type}'
-    
-######################################
-#LEXER
-#####################################
 
-#Text handling and position
+#######################################
+# LEXER
+#######################################
+
 class Lexer:
-    def __init__(self, fn ,text):
+    def __init__(self, fn, text):
         self.fn = fn
         self.text = text
-        self.pos = Position(-1, 0, -1, self.fn, text)
+        self.pos = Position(-1, 0, -1, fn, text)
         self.current_char = None
         self.advance()
-
-    #First character increment
-    def advance(self):
-        self.pos += 1
-        self.current_char = self.text[self.pos] if self.pos < len(self.text) else None
     
-    #Next Character Peek
-    def peek(self):
-        peek_pos = self.pos +1
-        return self.text[peek_pos] if peek_pos <len(self.text) else None
-
-##################################
-#Operations
-##################################
+    def advance(self):
+        self.pos.advance(self.current_char)
+        self.current_char = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
 
     def make_tokens(self):
         tokens = []
 
         while self.current_char != None:
-            if self.current_char in '\t':
+            if self.current_char in ' \t':
                 self.advance()
             elif self.current_char in DIGITS:
                 tokens.append(self.make_number())
@@ -119,34 +103,25 @@ class Lexer:
                 self.advance()
             elif self.current_char == '*':
                 tokens.append(Token(TT_MUL))
-                if self.peek() == '*':          
-                    tokens.append(Token(TT_POW))
-                    self.advance()
                 self.advance()
             elif self.current_char == '/':
-                if self.peek() == '/':
-                    tokens.append(Token(TT_FLOOR))
-                    self.advance()
-                    self.advance()
-                else:
-                    tokens.append(Token(TT_DIV))
-                    self.advance()
                 tokens.append(Token(TT_DIV))
                 self.advance()
-            
-            elif self.current_char == '()':
+            elif self.current_char == '(':
                 tokens.append(Token(TT_LPAREN))
                 self.advance()
             elif self.current_char == ')':
                 tokens.append(Token(TT_RPAREN))
                 self.advance()
             else:
+                pos_start = self.pos.copy()
                 char = self.current_char
                 self.advance()
-                return[], IllegalCharError("'"+char+"'")
+                return [], IllegalCharError(pos_start, self.pos, "'" + char + "'")
+
         return tokens, None
 
-def make_number(self):
+    def make_number(self):
         num_str = ''
         dot_count = 0
 
@@ -164,9 +139,10 @@ def make_number(self):
         else:
             return Token(TT_FLOAT, float(num_str))
 
-######################################
-##############RUN#####################
-######################################
+#######################################
+# RUN
+#######################################
+
 def run(fn, text):
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
