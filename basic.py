@@ -178,7 +178,18 @@ class BinOpNode:
         self.right_node = right_node
 
     def __repr__(self):
-        return f'({self/left_node}, {self.op_tok}, )'
+        return f'({self.left_node}, {self.op_tok}, {self.right_node} )'
+    
+
+#######################################
+#PARSER
+#######################################
+
+class Parser:
+    def __init__(tokens):
+        self.tokens = tokens 
+        self.tok_idx = 1
+        self.advance()
         
         
 
