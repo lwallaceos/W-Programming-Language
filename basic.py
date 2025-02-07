@@ -59,6 +59,7 @@ TT_PLUS     = 'PLUS'
 TT_MINUS    = 'MINUS'
 TT_MUL      = 'MUL'
 TT_DIV      = 'DIV'
+TT_POW      = 'POW'
 TT_LPAREN   = 'LPAREN'
 TT_RPAREN   = 'RPAREN'
 
@@ -102,7 +103,12 @@ class Lexer:
                 tokens.append(Token(TT_MINUS))
                 self.advance()
             elif self.current_char == '*':
-                tokens.append(Token(TT_MUL))
+                if self.peek() == '*':
+                    self.advance()
+                    self.advance()
+                    tokens.append(Token(TT_POW))
+                else:
+                    tokens.append(Token(TT_MUL))
                 self.advance()
             elif self.current_char == '/':
                 tokens.append(Token(TT_DIV))
