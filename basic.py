@@ -1,5 +1,6 @@
-#Token
-
+##############
+ #Token
+#############
 TT_INT      = 'TT_INT'
 TT_FLOAT    = 'FLOAT'
 TT_PLUS     = 'PLUS'
@@ -20,9 +21,9 @@ class Token:
         if self.value: return f'{self.type}:{self.value}'
         return f'{self.type}'
     
-
+##################
 #LEXER
-
+#################
 
 class Lexer:
     def __init__(self, text):
