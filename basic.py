@@ -44,3 +44,5 @@ class Lexer:
         while self.current_char != None:
             if self.current_char in '\t':
                 self.advance()
+            elif self.current_char == '+'
+                tokens.append(Token(TT_PLUS))
