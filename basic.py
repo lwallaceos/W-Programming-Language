@@ -66,8 +66,18 @@ class Lexer:
                 self.advance()
             elif self.current_char == '*':
                 tokens.append(Token(TT_MUL))
+                if self.peek() == '*':          
+                    tokens.append(Token(TT_POW))
+                    self.advance()
                 self.advance()
             elif self.current_char == '/':
+                if self.peek() == '/':
+                    tokens.append(Token(TT_FLOOR))
+                    self.advance()
+                    self.advance()
+                else:
+                    tokens.append(Token(TT_DIV))
+                    self.advance()
                 tokens.append(Token(TT_DIV))
                 self.advance()
             
