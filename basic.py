@@ -43,6 +43,12 @@ class Lexer:
         self.pos += 1
         self.current_char = self.text[pos] if self.pos < len(self.text) else None
     
+    def peek(self):
+        peek_pos = self.pos +1
+        return self.text[peek_pos] if peek_pos <len(self.text) else None
+
+
+
     def make_tokens(self):
         tokens = []
 
@@ -61,6 +67,7 @@ class Lexer:
             elif self.current_char == '/':
                 tokens.append(Token(TT_DIV))
                 self.advance()
+            
             elif self.current_char == '()':
                 tokens.append(Token(TT_LPAREN))
                 self.advance()
