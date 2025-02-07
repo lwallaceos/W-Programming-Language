@@ -7,17 +7,20 @@ DIGITS ='123456789'
 #Errors
 ############################
 class Error:
-    def __init__(self, error_name, details):
-        self.error_name = error_name 
+    def __init__(self, pos_start, pos_end, error_name, details):
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+        self.error_name = error_name
         self.details = details
-
+    
     def as_string(self):
-        result = f'{self.error_name}: {self.details}'
+        result  = f'{self.error_name}: {self.details}\n'
+        result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}'
         return result
 
-class IlleglCharError(Error):
-    def __init__(self, details):
-        super().__init__('Illegal Character', details)
+class IllegalCharError(Error):
+    def __init__(self, pos_start, pos_end, details):
+        super().__init__(pos_start, pos_end, 'Illegal Character', details)
 
 #######################################
 # POSITION
@@ -45,9 +48,9 @@ class Position:
         return Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
 
         
-##############
+################################
  #Token
-#############
+###############################
 TT_INT      = 'TT_INT'
 TT_FLOAT    = 'FLOAT'
 TT_PLUS     = 'PLUS'
@@ -73,13 +76,14 @@ class Token:
         if self.value: return f'{self.type}:{self.value}'
         return f'{self.type}'
     
-##################
+######################################
 #LEXER
-#################
+#####################################
 
 #Text handling and position
 class Lexer:
-    def __init__(self, text):
+    def __init__(self, fn ,text):
+        self.fn = fn
         self.text = text
         self.pos = Position(-1, 0, -1, self.fn, text)
         self.current_char = None
@@ -95,9 +99,9 @@ class Lexer:
         peek_pos = self.pos +1
         return self.text[peek_pos] if peek_pos <len(self.text) else None
 
-#################
+##################################
 #Operations
-################
+##################################
 
     def make_tokens(self):
         tokens = []
@@ -139,8 +143,7 @@ class Lexer:
             else:
                 char = self.current_char
                 self.advance()
-                return[], IlleglCharError("'"+char+"'")
-
+                return[], IllegalCharError("'"+char+"'")
         return tokens, None
 
 def make_number(self):
@@ -161,14 +164,12 @@ def make_number(self):
         else:
             return Token(TT_FLOAT, float(num_str))
 
-#######################
-#RUN
-######################
-def run(text):
-    while True:
-        text=
-    lexer = Lexer(text)
+######################################
+##############RUN#####################
+######################################
+from W import run
+def run(fn, text):
+    lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
 
     return tokens, error
-    
