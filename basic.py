@@ -11,7 +11,7 @@ TT_LPAREN   = 'LPAREN'
 TT_RPAREN   = 'RPAREN'
 
 
-
+#Define tokens
 class Token:
     def __init__(self, type_, value):
         self.type = type_
@@ -25,6 +25,7 @@ class Token:
 #LEXER
 #################
 
+#Text handling and position
 class Lexer:
     def __init__(self, text):
         self.text = text
