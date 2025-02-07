@@ -2,6 +2,7 @@
 #Constants
 ###############
 DIGITS ='123456789'
+
 ############################
 #Errors
 ############################
@@ -16,8 +17,32 @@ class Error:
 
 class IlleglCharError(Error):
     def __init__(self, details):
-        super().__init__('Illegal Character', details):
+        super().__init__('Illegal Character', details)
 
+#######################################
+# POSITION
+#######################################
+
+class Position:
+    def __init__(self, idx, ln, col, fn, ftxt):
+        self.idx = idx
+        self.ln = ln
+        self.col = col
+        self.fn = fn
+        self.ftxt = ftxt
+
+    def advance(self, current_char):
+        self.idx += 1
+        self.col += 1
+
+        if current_char == '\n':
+            self.ln += 1
+            self.col = 0
+
+        return self
+
+    def copy(self):
+        return Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
 
         
 ##############
@@ -40,7 +65,7 @@ TT_EQ       = 'EQ'      # ==
 
 #Define tokens
 class Token:
-    def __init__(self, type_, value):
+    def __init__(self, type_, value = None):
         self.type = type_
         self.type = value
     
@@ -56,14 +81,14 @@ class Token:
 class Lexer:
     def __init__(self, text):
         self.text = text
-        self.pos = Position(-1, 0, -1, fn, text)
+        self.pos = Position(-1, 0, -1, self.fn, text)
         self.current_char = None
         self.advance()
 
     #First character increment
     def advance(self):
         self.pos += 1
-        self.current_char = self.text[pos] if self.pos < len(self.text) else None
+        self.current_char = self.text[self.pos] if self.pos < len(self.text) else None
     
     #Next Character Peek
     def peek(self):
@@ -135,3 +160,15 @@ def make_number(self):
             return Token(TT_INT, int(num_str))
         else:
             return Token(TT_FLOAT, float(num_str))
+
+#######################
+#RUN
+######################
+def run(text):
+    while True:
+        text=
+    lexer = Lexer(text)
+    tokens, error = lexer.make_tokens()
+
+    return tokens, error
+    
