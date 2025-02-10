@@ -192,7 +192,7 @@ class BinOpNode:
 class Parser:
     def __init__(self,tokens):
       self.tokens = tokens 
-      self.tok_idx = 1
+      self.tok_idx = -1
       self.advance()
 
     def advance(self):
@@ -201,6 +201,11 @@ class Parser:
             self.current_tok = self.tokens[self.tok_idx]
         return self.current_tok
     
+    ################################
+
+    def parse(self):
+        res = self.expr()
+        return res
 
     def factor(self):
         tok = self.current_tok
@@ -214,13 +219,14 @@ class Parser:
         return self.bin_op(self.factor, (TT_MUL, TT_DIV))
     
     def expr(self):
-        return self.bin_op(self.factor, (TT_PLUS, TT_MINUS))
+        return self.bin_op(self.term, (TT_PLUS, TT_MINUS))
 
     def bin_op(self, func, ops):
         left = func()
 
-        while self.current_tok in ops:
+        while self.current_tok.type in ops:
             op_tok = self.current_tok
+            self.advance()
             right = func()
             left = BinOpNode (left, op_tok, right)
         return left
@@ -237,6 +243,13 @@ class Parser:
 def run(fn, text):
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
+    if error: return None, error
 
-    return tokens, error
 
+##########################
+#Abstract Syntax Tree
+#########################
+    parser =  Parser(tokens)
+    ast = parser.parse()
+
+    return ast, None
