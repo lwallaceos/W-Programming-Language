@@ -1,4 +1,8 @@
 #######################################
+# IMPORTS
+#######################################
+from strings_with_arrows import *
+#######################################
 # CONSTANTS
 #######################################
 
@@ -18,6 +22,7 @@ class Error:
     def as_string(self):
         result  = f'{self.error_name}: {self.details}\n'
         result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}'
+        result += '\n\n' + string_with_arrows(self.pos_start.ftxt, self.pos_start, self.pos_end)
         return result
 
 class IllegalCharError(Error):
@@ -56,6 +61,7 @@ class Position:
 # TOKENS
 #######################################
 
+
 TT_INT		= 'INT'
 TT_FLOAT    = 'FLOAT'
 TT_PLUS     = 'PLUS'
@@ -69,9 +75,17 @@ TT_LPAREN   = 'LPAREN'
 TT_RPAREN   = 'RPAREN'
 
 class Token:
-    def __init__(self, type_, value=None):
+    def __init__(self, type_, value=None, pos_start = None, pos_end = None):
         self.type = type_
         self.value = value
+
+        if pos_start:
+            self.pos_start = pos_start.copy()
+            self.pos_end = pos_start.copy()
+            self.pos_end.advance()
+
+        if pos_end:
+            self.pos_end = pos_end
     
     def __repr__(self):
         if self.value: return f'{self.type}:{self.value}'
