@@ -60,6 +60,7 @@ TT_MINUS    = 'MINUS'
 TT_MUL      = 'MUL'
 TT_DIV      = 'DIV'
 TT_POW      = 'POW'
+TT_MOD      = 'MOD'
 TT_FLOOR    = 'FLOOR'
 TT_LPAREN   = 'LPAREN'
 TT_RPAREN   = 'RPAREN'
@@ -108,6 +109,9 @@ class Lexer:
                 self.advance()
             elif self.current_char == '-':
                 tokens.append(Token(TT_MINUS))
+                self.advance()
+            elif self.current_char == '%':
+                tokens.append(Token(TT_MOD))
                 self.advance()
             elif self.current_char == '*':
                 next_char = self.peek()
