@@ -244,11 +244,11 @@ class Parser:
             self.current_tok = self.tokens[self.tok_idx]
         return self.current_tok
     
-    ################################
-
     def parse(self):
         res = self.expr()
         return res
+    
+#################################
 
     def factor(self):
         tok = self.current_tok
