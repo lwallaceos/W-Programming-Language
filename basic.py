@@ -274,7 +274,7 @@ class Parser:
         ))
 
     def power(self):
-        return self.binop(self.factor, (TT_POW), self.power)
+        return self.binop(self.factor, (TT_POW), right_associative=True)
     
     def term(self):
         return self.bin_op(self.factor, (TT_MUL, TT_DIV, TT_MOD, TT_FLOOR))
@@ -282,7 +282,7 @@ class Parser:
     def expr(self):
         return self.bin_op(self.term, (TT_PLUS, TT_MINUS))
 
-    def bin_op(self, func, ops, right_func=None):
+    def bin_op(self, func, ops, right_associative=False):
         res = ParseResult()
         left = res.register(func())
         if res.error: return res
@@ -290,7 +290,7 @@ class Parser:
         while self.current_tok.type in ops:
             op_tok = self.current_tok
             res.register(self.advance())
-            right = res.register(func())
+            right = res.register(self.bin_op(func, ops, right_associative) if right_associative else func())
             if res.error: return res
             left = BinOpNode (left, op_tok, right)
         return res.success(left)
