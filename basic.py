@@ -314,8 +314,39 @@ class Parser:
             if res.error: return res
             left = BinOpNode (left, op_tok, right)
         return res.success(left)
+    
+######################################
+#Values
+#####################################
 
+class Number:
+    def __init__(self, value):
+        self.value = value
+        self.set_pos()
+
+    def set_pos(self, pos_start=None, pos_end=None):
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+        return self
+    
+    def added_to(self, other):
+        if isinstance(other, Number):
+            return Number(self.value + other.value)
         
+    def subbed_by(self, other):
+        if isinstance(other, Number):
+            return Number(self.value - other.value)
+    
+    def multed_by(self, other):
+        if isinstance(other, Number):
+            return Number(self.value * other.value)
+        
+    def dived_by(self, other):
+        if isinstance(other, Number):
+            return Number(self.value / other.value)
+        
+    def __repr__(self):
+        return str(self.value)
         
 #######################################
 # Interpreter
@@ -332,13 +363,26 @@ class Interpreter:
     ######################################
 
     def visit_NumberNode(self,node):
-        print("Found number node")
+        return Number(node.tok.value).set_pos(node.pos_start, node.pos_end)
 
-    def visit_UnaryOpNode(self, node):
-        print("Bin op node found")
 
-    def visit_BinOpNode(self,node):
-        print("Found unary op node")
+    def visit_BinOpNode(self, node):
+        left = self.visit(node.left_node)
+        right = self.visit(node.node)
+
+        if node.ope_tok.value == TT_PLUS:
+            result = left.added_to(right)
+        elif node.op_tok.value == TT_MINUS:
+            result = left.subbed_by(right)
+        elif node.op_tok.value == TT_MUL:
+            result = left.multed_by(right)
+        elif node.op_tok.value == TT_DIV:
+            result = left.dived_by(right)
+
+        return result
+
+    def visitUnaryOpNode(self,node):
+       number = 
         
 
 #######################################
@@ -358,7 +402,6 @@ def run(fn, text):
 
 	# Run program
 	interpreter = Interpreter()
-	context = Context('<program>')
-	result = interpreter.visit(ast.node, context)
+	interpreter.visit(ast.node)
 
-	return result.value, result.error
+	return None, None
