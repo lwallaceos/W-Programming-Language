@@ -273,14 +273,16 @@ class Parser:
             "Expected Integer or Float"
         ))
 
-
+    def power(self):
+        return self.binop(self.factor, (TT_POW), self.power)
+    
     def term(self):
-        return self.bin_op(self.factor, (TT_MUL, TT_DIV))
+        return self.bin_op(self.factor, (TT_MUL, TT_DIV, TT_MOD, TT_FLOOR))
     
     def expr(self):
         return self.bin_op(self.term, (TT_PLUS, TT_MINUS))
 
-    def bin_op(self, func, ops):
+    def bin_op(self, func, ops, right_func=None):
         res = ParseResult()
         left = res.register(func())
         if res.error: return res
