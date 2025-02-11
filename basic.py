@@ -44,7 +44,7 @@ class Position:
         self.fn = fn
         self.ftxt = ftxt
 
-    def advance(self, current_char):
+    def advance(self, current_char=None):
         self.idx += 1
         self.col += 1
 
@@ -73,6 +73,7 @@ TT_MOD      = 'MOD'
 TT_FLOOR    = 'FLOOR'
 TT_LPAREN   = 'LPAREN'
 TT_RPAREN   = 'RPAREN'
+TT_EOF      = 'EOF'
 
 class Token:
     def __init__(self, type_, value=None, pos_start = None, pos_end = None):
@@ -122,49 +123,50 @@ class Lexer:
             elif self.current_char in DIGITS:
                 tokens.append(self.make_number())
             elif self.current_char == '+':
-                tokens.append(Token(TT_PLUS))
+                tokens.append(Token(TT_PLUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '-':
-                tokens.append(Token(TT_MINUS))
+                tokens.append(Token(TT_MINUS,pos_start=self.pos))
                 self.advance()
             elif self.current_char == '%':
-                tokens.append(Token(TT_MOD))
+                tokens.append(Token(TT_MOD,pos_start=self.pos))
                 self.advance()
             elif self.current_char == '*':
                 next_char = self.peek()
                 if next_char == '*':
                     self.advance()
                     self.advance()
-                    tokens.append(Token(TT_POW))
+                    tokens.append(Token(TT_POW,pos_start=self.pos))
                 else:
                     self.advance()
-                    tokens.append(Token(TT_MUL))
+                    tokens.append(Token(TT_MUL,pos_start=self.pos))
             elif self.current_char == '/':
                 next_char = self.peek()
                 if next_char == '/':
                     self.advance()
                     self.advance()
-                    tokens.append(Token(TT_FLOOR))
+                    tokens.append(Token(TT_FLOOR,pos_start=self.pos))
                 else:
                     self.advance()
-                    tokens.append(Token(TT_DIV))
+                    tokens.append(Token(TT_DIV,pos_start=self.pos))
             elif self.current_char == '(':
-                tokens.append(Token(TT_LPAREN))
+                tokens.append(Token(TT_LPAREN,pos_start=self.pos))
                 self.advance()
             elif self.current_char == ')':
-                tokens.append(Token(TT_RPAREN))
+                tokens.append(Token(TT_RPAREN,pos_start=self.pos))
                 self.advance()
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char
                 self.advance()
                 return [], IllegalCharError(pos_start, self.pos, "'" + char + "'")
-
+        tokens.append(Token(TT_EOF, pos_start=self.pos))
         return tokens, None
 
     def make_number(self):
         num_str = ''
         dot_count = 0
+        pos_start = self.pos.copy()
 
         while self.current_char != None and self.current_char in DIGITS + '.':
             if self.current_char == '.':
@@ -176,9 +178,9 @@ class Lexer:
             self.advance()
 
         if dot_count == 0:
-            return Token(TT_INT, int(num_str))
+            return Token(TT_INT, int(num_str),pos_start, self.pos)
         else:
-            return Token(TT_FLOAT, float(num_str))
+            return Token(TT_FLOAT, float(num_str),pos_start, self.pos)
         
 
 #######################################
@@ -201,6 +203,13 @@ class BinOpNode:
     def __repr__(self):
         return f'({self.left_node}, {self.op_tok}, {self.right_node} )'
     
+    class UnaryOpNode:
+        def __init__(self, op_tok, node): 
+            self.op_tok = op_tok
+            self.node = node
+
+        def __repr__(self):
+            return f'({self.op_tok}, {self.node})'
 #######################################
 #Parse Result 
 ######################################
@@ -224,10 +233,6 @@ class ParseResult:
         self.error = error
         return self
 
-
-
-
-
 #######################################
 #PARSER
 #######################################
@@ -246,16 +251,27 @@ class Parser:
     
     def parse(self):
         res = self.expr()
+        if not res.error and self.current_tok.type != TT_EOF:
+            return res.failure(InvalidSyntaxError(
+                self.current_tok.pos_start, self.current_tok.pos_end,
+                "Expected '+', '-','*', '/' ,'//', '**', '%'"
+            ))
         return res
     
 #################################
 
     def factor(self):
+        res = ParseResult()
         tok = self.current_tok
 
         if tok.type in (TT_INT, TT_FLOAT):
-            self.advance()
-            return NumberNode(tok)
+            res.register(self.advance())
+            return res.success(NumberNode(tok))
+
+        return res.failure(InvalidSyntaxError(
+            tok.pos_start, tok.pos_end,
+            "Expected Integer or Float"
+        ))
 
 
     def term(self):
@@ -265,14 +281,17 @@ class Parser:
         return self.bin_op(self.term, (TT_PLUS, TT_MINUS))
 
     def bin_op(self, func, ops):
-        left = func()
+        res = ParseResult()
+        left = res.register(func())
+        if res.error: return res
 
         while self.current_tok.type in ops:
             op_tok = self.current_tok
-            self.advance()
-            right = func()
+            res.register(self.advance())
+            right = res.register(func())
+            if res.error: return res
             left = BinOpNode (left, op_tok, right)
-        return left
+        return res.success(left)
 
         
         
@@ -295,4 +314,4 @@ def run(fn, text):
     parser =  Parser(tokens)
     ast = parser.parse()
 
-    return ast, None
+    return ast.node, ast.error
