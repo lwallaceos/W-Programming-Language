@@ -274,10 +274,10 @@ class Parser:
         ))
 
     def power(self):
-        return self.binop(self.factor, (TT_POW), right_associative=True)
+        return self.bin_op(self.factor, (TT_POW), right_associative=True)
     
     def term(self):
-        return self.bin_op(self.factor, (TT_MUL, TT_DIV, TT_MOD, TT_FLOOR))
+        return self.bin_op(self.power, (TT_MUL, TT_DIV, TT_MOD, TT_FLOOR))
     
     def expr(self):
         return self.bin_op(self.term, (TT_PLUS, TT_MINUS))
