@@ -317,7 +317,28 @@ class Parser:
 
         
         
-        
+#######################################
+# Interpreter
+#####################################        
+class Interpreter:
+    def visit(self,node):
+        method_name = f'visit_{type(node).__name__}'
+        method = getattr(self, method_name, self.no_visit_method)
+        return method(node)
+    
+    def no_visit_method(self, node):
+        raise Exception (f'No Visit,{type(node).__name__} method defined')
+    
+    ######################################
+
+    def visit_NumberNode(self,node):
+        print("Found number node")
+
+    def visit_UnaryOpNode(self, node):
+        print("Bin op node found")
+
+    def visit_BinOpNode(self,node):
+        print("Found unary op node")
         
 
 #######################################
@@ -335,5 +356,15 @@ def run(fn, text):
 #########################
     parser =  Parser(tokens)
     ast = parser.parse()
+    if ast.error: return None, ast.error
 
     return ast.node, ast.error
+
+#############################
+#Run program
+#############################
+
+    interpreter = Interpreter()
+    interpreter.visit(ast.node)
+
+    return None
