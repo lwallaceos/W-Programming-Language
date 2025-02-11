@@ -1,7 +1,6 @@
-expr    : term ((PLUS|MINUS)term)*
-
-term    : factor ((MUL|DIV)factor)*
-
-factor : INT|FLOAT
-       : (PLUS|MINUS) factor
-       : LPAREN expr RPAREN
+expr    : term ((PLUS | MINUS) term)*
+term    : power ((MUL | DIV | MOD | FLOOR) power)*
+power   : factor (POW power)*
+factor  : INT | FLOAT
+        | (PLUS | MINUS) factor
+        | LPAREN expr RPAREN
