@@ -32,7 +32,6 @@ class IllegalCharError(Error):
 class InvalidSyntaxError(Error):
     def __init__(self, pos_start, pos_end, details):
         super().__init__(pos_start, pos_end, 'Invalid Syntx', details)
-
 class RTError(Error):
     def __init__(self, pos_start, pos_end, details):
         super().__init__(pos_start, pos_end, 'Runtime Error', details)
@@ -329,8 +328,7 @@ class Parser:
             if res.error: return res
             left = BinOpNode (left, op_tok, right)
         return res.success(left)
-    
-#####################################
+    #####################################
 #Runtime result/error
 ####################################
 
@@ -350,8 +348,7 @@ class RTResult:
     def failure(self,error):
         self.error = error
         return self
-    
-######################################
+######################################d
 #Values
 #####################################
 
@@ -367,27 +364,27 @@ class Number:
     
     def added_to(self, other):
         if isinstance(other, Number):
-            return Number(self.value + other.value), None
+            return Number(self.value + other.value),None
         
     def subbed_by(self, other):
         if isinstance(other, Number):
-            return Number(self.value - other.value), None
+            return Number(self.value - other.value),None
         
     def powed_by(self, other):
         if isinstance(other, Number):
-            return Number(self.value ** other.value)
+            return Number(self.value ** other.value),None
 
     def modded_by(self, other):
         if isinstance(other, Number):
             if other.value == 0:
                 return Number (0)
-            return Number(self.value % other.value)
+            return Number(self.value % other.value),None
 
     def floored_by(self, other):
         if isinstance(other, Number):
             if other.value == 0:
                 return Number(0)
-            return Number(self.value // other.value)
+            return Number(self.value // other.value),None
     
     def multed_by(self, other):
         if isinstance(other, Number):
@@ -397,7 +394,7 @@ class Number:
         if isinstance(other, Number):
             if other.value == 0:
                 return None, RTError(
-                    other.po_start, other.poss_end,
+                    other.pos_start, other.pos_end,
                     "Undefined"
                 )
             return Number(self.value / other.value), None
@@ -420,51 +417,39 @@ class Interpreter:
     ######################################
 
     def visit_NumberNode(self,node):
-         return RTResult().success(
-         Number(node.tok.value).set_pos(node.pos_start, node.pos_end)
-         )
+        return Number(node.tok.value).set_pos(node.pos_start, node.pos_end)
+
 
     def visit_BinOpNode(self, node):
-        res = RTResult()
-        left = res.register(self.visit(node.left_node))
-        if res.error: return res
-        right = res.register(self.visit(node.right_node))
-        if res.error: return res
+        left = self.visit(node.left_node)
+        right = self.visit(node.right_node)
 
         if node.op_tok.type == TT_PLUS:
-            result, error = left.added_to(right)
+            result,error = left.added_to(right)
         elif node.op_tok.type == TT_MINUS:
-            result,error = left.subbed_by(right)
+            result,error= left.subbed_by(right)
         elif node.op_tok.type == TT_MUL:
             result,error = left.multed_by(right)
         elif node.op_tok.type == TT_DIV:
-            result,error = left.dived_by(right)
+            result ,error= left.dived_by(right)
         elif node.op_tok.type == TT_POW:
-            result,error = left.powed_by(right)
+            result,errror = left.powed_by(right)
         elif node.op_tok.type == TT_MOD:
             result,error = left.modded_by(right)
         elif node.op_tok.type == TT_FLOOR:
-            result,error = left.floored_by(right)
-        
-        if error:
-            return res.failure(error)
+            result,error= left.floored_by(right)
         else:
-            return res.success(result.set_pos(node.pos_start, node.pos_end))
+            raise Exception(f"Unknown operator {node.op_tok.type}")
+
+        return result.set_pos(node.pos_start, node.pos_end)
 
     def visitUnaryOpNode(self,node):
-       res = RTResult()
-       number = res.register(self.visit(node.node))
-       if res.error: return res
-
-       error = None
+       number = self.visit(node.node)
 
        if node.op_tok.type == TT_MINUS:
-        number, error = number.multed_by(Number(-1))
+        number = number.multed_by(Number(-1))
 
-        if error:
-            return res.failure(error)
-        else:
-            return res.success(number.set_pos(node.pos_start, node.pos_end))
+       return number.set_pos(node.pos_start, node.pos_end)
         
         
 
@@ -487,4 +472,4 @@ def run(fn, text):
 	interpreter = Interpreter()
 	result = interpreter.visit(ast.node)
 
-	return result.value, result.error
+	return result, None
