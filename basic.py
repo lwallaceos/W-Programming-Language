@@ -190,6 +190,9 @@ class Lexer:
 class NumberNode:
     def __init__(self, tok):
        self.tok = tok 
+
+       self.pos_start = self.tok.pos_start
+       self.pos_end = self.tok_pos_end
     
     def __repr__(self):
         return f'{self.tok}'
@@ -200,6 +203,9 @@ class BinOpNode:
         self.op_tok = op_tok
         self.right_node = right_node
 
+        self.pos_start = self.left_node.pos_start
+        self.pos_end = self.right_node.pos_end
+
     def __repr__(self):
         return f'({self.left_node}, {self.op_tok}, {self.right_node} )'
     
@@ -208,6 +214,9 @@ class UnaryOpNode:
         self.op_tok = op_tok
         self.node = node
 
+        self.pos_start = self.op_tok.pos_start
+        self.pos_end = node.pos_end
+        
     def __repr__(self):
         return f'({self.op_tok}, {self.node})'
 #######################################
@@ -379,10 +388,15 @@ class Interpreter:
         elif node.op_tok.value == TT_DIV:
             result = left.dived_by(right)
 
-        return result
+        return result.set_pos(node.pos_start, node.pos_end)
 
     def visitUnaryOpNode(self,node):
-       number = 
+       number = self.visit(node.node)
+
+       if node.op_tok.type == TT_MINUS:
+        number = number.multed_by(Number(-1))
+        return result.set_pos(node.pos_start, node.pos_end)
+        
         
 
 #######################################
@@ -402,6 +416,6 @@ def run(fn, text):
 
 	# Run program
 	interpreter = Interpreter()
-	interpreter.visit(ast.node)
+	result = interpreter.visit(ast.node)
 
-	return None, None
+	return result, None
