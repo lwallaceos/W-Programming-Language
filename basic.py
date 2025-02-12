@@ -132,6 +132,7 @@ class Lexer:
                 tokens.append(Token(TT_MOD,pos_start=self.pos))
                 self.advance()
             elif self.current_char == '*':
+                pos_start = self.copy = self.pos.copy()
                 next_char = self.peek()
                 if next_char == '*':
                     self.advance()
@@ -141,6 +142,7 @@ class Lexer:
                     self.advance()
                     tokens.append(Token(TT_MUL,pos_start=self.pos))
             elif self.current_char == '/':
+                pos_start = self.pos.copy()
                 next_char = self.peek()
                 if next_char == '/':
                     self.advance()
