@@ -326,6 +326,27 @@ class Parser:
             left = BinOpNode (left, op_tok, right)
         return res.success(left)
     
+#####################################
+#Runtime result/error
+####################################
+
+class RTRresult:
+    def __init__(self):
+        self.value = None
+        self.error = None
+
+    def register(self,res):
+        if res.error: self.error = res.error
+        return res.error
+    
+    def success(self,value):
+        self.value = value
+        return self
+    
+    def failure(self,error):
+        self.error = error
+        return self
+    
 ######################################
 #Values
 #####################################
