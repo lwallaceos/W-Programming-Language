@@ -136,7 +136,7 @@ class Lexer:
                 if next_char == '*':
                     self.advance()
                     self.advance()
-                    tokens.append(Token(TT_POW,pos_start=self.pos))
+                    tokens.append(Token(TT_POW,pos_start=pos_start, pos_end=self.pos))
                 else:
                     self.advance()
                     tokens.append(Token(TT_MUL,pos_start=self.pos))
@@ -145,7 +145,7 @@ class Lexer:
                 if next_char == '/':
                     self.advance()
                     self.advance()
-                    tokens.append(Token(TT_FLOOR,pos_start=self.pos))
+                    tokens.append(Token(TT_FLOOR,pos_start=pos_start, pos_end=self.pos))
                 else:
                     self.advance()
                     tokens.append(Token(TT_DIV,pos_start=self.pos))
@@ -192,7 +192,7 @@ class NumberNode:
        self.tok = tok 
 
        self.pos_start = self.tok.pos_start
-       self.pos_end = self.tok_pos_end
+       self.pos_end = self.tok.pos_end
     
     def __repr__(self):
         return f'{self.tok}'
@@ -216,7 +216,7 @@ class UnaryOpNode:
 
         self.pos_start = self.op_tok.pos_start
         self.pos_end = node.pos_end
-        
+
     def __repr__(self):
         return f'({self.op_tok}, {self.node})'
 #######################################
@@ -345,6 +345,22 @@ class Number:
     def subbed_by(self, other):
         if isinstance(other, Number):
             return Number(self.value - other.value)
+        
+    def powed_by(self, other):
+        if isinstance(other, Number):
+            return Number(self.value ** other.value)
+
+    def modded_by(self, other):
+        if isinstance(other, Number):
+            if other.value == 0:
+                return Number (0)
+            return Number(self.value % other.value)
+
+    def floored_by(self, other):
+        if isinstance(other, Number):
+            if other.value == 0:
+                return Number(0)
+            return Number(self.value // other.value)
     
     def multed_by(self, other):
         if isinstance(other, Number):
@@ -352,6 +368,8 @@ class Number:
         
     def dived_by(self, other):
         if isinstance(other, Number):
+            if other.value == 0:
+                return Number(0)
             return Number(self.value / other.value)
         
     def __repr__(self):
@@ -377,16 +395,24 @@ class Interpreter:
 
     def visit_BinOpNode(self, node):
         left = self.visit(node.left_node)
-        right = self.visit(node.node)
+        right = self.visit(node.right_node)
 
-        if node.ope_tok.value == TT_PLUS:
+        if node.op_tok.type == TT_PLUS:
             result = left.added_to(right)
-        elif node.op_tok.value == TT_MINUS:
+        elif node.op_tok.type == TT_MINUS:
             result = left.subbed_by(right)
-        elif node.op_tok.value == TT_MUL:
+        elif node.op_tok.type == TT_MUL:
             result = left.multed_by(right)
-        elif node.op_tok.value == TT_DIV:
+        elif node.op_tok.type == TT_DIV:
             result = left.dived_by(right)
+        elif node.op_tok.type == TT_POW:
+            result = left.powed_by(right)
+        elif node.op_tok.type == TT_MOD:
+            result = left.modded_by(right)
+        elif node.op_tok.type == TT_FLOOR:
+            result = left.floored_by(right)
+        else:
+            raise Exception(f"Unknown operator {node.op_tok.type}")
 
         return result.set_pos(node.pos_start, node.pos_end)
 
@@ -395,7 +421,8 @@ class Interpreter:
 
        if node.op_tok.type == TT_MINUS:
         number = number.multed_by(Number(-1))
-        return result.set_pos(node.pos_start, node.pos_end)
+
+       return number.set_pos(node.pos_start, node.pos_end)
         
         
 
