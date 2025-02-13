@@ -129,7 +129,12 @@ class Lexer:
                 tokens.append(Token(TT_PLUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '-':
-                tokens.append(Token(TT_MINUS,pos_start=self.pos))
+                pos_start = self.pos.copy()
+                self.advance
+                if self.current_char in DIGITS:
+                    tokens.append(self.make_number(pos_start))
+                else:
+                    tokens.append(Token(TT_MINUS,pos_start=self.pos))
                 self.advance()
             elif self.current_char == '%':
                 tokens.append(Token(TT_MOD,pos_start=self.pos))
@@ -321,14 +326,17 @@ class Parser:
         left = res.register(func())
         if res.error: return res
 
-        while self.current_tok.type in ops:
-            op_tok = self.current_tok
-            res.register(self.advance())
+        while self.current_tok.type in ops or self.current_tok.type in (TT_LPAREN, TT_INT, TT_FLOAT):
+            if self.current_tok.type in (TT_LPAREN, TT_INT, TT_FLOAT):
+                op_tok = Token(TT_MUL, pos_start=self.current_tok.pos_start)
+            else:
+                op_tok = self.current_tok
+                res.register(self.advance())
             right = res.register(self.bin_op(func, ops, right_associative) if right_associative else func())
             if res.error: return res
             left = BinOpNode (left, op_tok, right)
         return res.success(left)
-    #####################################
+#####################################
 #Runtime result/error
 ####################################
 
