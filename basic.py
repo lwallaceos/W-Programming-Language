@@ -347,7 +347,7 @@ class RTResult:
 
     def register(self,res):
         if res.error: self.error = res.error
-        return res.error
+        return res.value
     
     def success(self,value):
         self.value = value
