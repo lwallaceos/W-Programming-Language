@@ -451,11 +451,13 @@ class Interpreter:
 
         return result.set_pos(node.pos_start, node.pos_end)
 
-    def visitUnaryOpNode(self,node):
+    def visit_UnaryOpNode(self,node):
        number = self.visit(node.node)
 
        if node.op_tok.type == TT_MINUS:
-        number = number.multed_by(Number(-1))
+        number, error = number.multed_by(Number(-1))
+        if error: 
+            return error
 
        return number.set_pos(node.pos_start, node.pos_end)
         
@@ -466,18 +468,19 @@ class Interpreter:
 #######################################
 
 def run(fn, text):
-	# Generate tokens
-	lexer = Lexer(fn, text)
-	tokens, error = lexer.make_tokens()
-	if error: return None, error
-	
-	# Generate AST
-	parser = Parser(tokens)
-	ast = parser.parse()
-	if ast.error: return None, ast.error
+    # Generate tokens
+    lexer = Lexer(fn, text)
+    tokens, error = lexer.make_tokens()
+    if error: return None, error
+    
+    # Generate AST
+    parser = Parser(tokens)
+    ast = parser.parse()
+    if ast.error: return None, ast.error
+    
 
-	# Run program
-	interpreter = Interpreter()
-	result = interpreter.visit(ast.node)
+    # Run program
+    interpreter = Interpreter()
+    result = interpreter.visit(ast.node)
 
-	return result, None
+    return result, None
