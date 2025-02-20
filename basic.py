@@ -339,7 +339,6 @@ class Parser:
 #####################################
 #Runtime result/error
 ####################################
-
 class RTResult:
     def __init__(self):
         self.value = None
@@ -356,6 +355,7 @@ class RTResult:
     def failure(self,error):
         self.error = error
         return self
+
 ######################################d
 #Values
 #####################################
@@ -426,8 +426,7 @@ class Interpreter:
 
     def visit_NumberNode(self,node):
         return Number(node.tok.value).set_pos(node.pos_start, node.pos_end)
-
-
+        
     def visit_BinOpNode(self, node):
         left = self.visit(node.left_node)
         right = self.visit(node.right_node)
