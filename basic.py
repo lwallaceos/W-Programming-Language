@@ -76,7 +76,8 @@ class Position:
 # TOKENS
 #######################################
 
-
+TT_IDNETIFIER = "IDENTIFIER"
+TT_KEYWORD = "KEYWORD"
 TT_INT = "INT"
 TT_FLOAT = "FLOAT"
 TT_PLUS = "PLUS"
@@ -84,6 +85,7 @@ TT_MINUS = "MINUS"
 TT_MUL = "MUL"
 TT_DIV = "DIV"
 TT_POW = "POW"
+TT_EQ = "EQ"
 TT_MOD = "MOD"
 TT_FLOOR = "FLOOR"
 TT_LPAREN = "LPAREN"
