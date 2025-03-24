@@ -2,13 +2,15 @@
 # IMPORTS
 #######################################
 from strings_with_arrows import string_with_arrows
+import string
 
 #######################################
 # CONSTANTS
 #######################################
 
 DIGITS = "0123456789"
-
+LETTERS = string.ascii_letters
+LETTERS_DIGITS = LETTERS + DIGITS
 #######################################
 # ERRORS
 #######################################
@@ -143,6 +145,8 @@ class Lexer:
         while self.current_char is not None:
             if self.current_char in " \t":
                 self.advance()
+            elif self.current_char in LETTERS:
+                tokens.append(self.make_identifier)
             elif self.current_char in DIGITS:
                 tokens.append(self.make_number())
             elif self.current_char == "+":
@@ -158,6 +162,9 @@ class Lexer:
                 self.advance()
             elif self.current_char == "%":
                 tokens.append(Token(TT_MOD, pos_start=self.pos))
+                self.advance()
+            elif self.current_char == "=":
+                tokens.append(Token(TT_EQ, pos_start=self.pos))
                 self.advance()
             elif self.current_char == "*":
                 pos_start = self.copy = self.pos.copy()
